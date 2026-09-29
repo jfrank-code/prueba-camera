@@ -32,7 +32,7 @@ APP_SECRET = os.getenv("APP_SECRET", "")
 #   Genérico/global: https://open.ezvizlife.com
 EZVIZ_TOKEN_URL = os.getenv(
     "EZVIZ_TOKEN_URL",
-    "https://isaopen.ezviz.com/api/lapp/token/get"
+    "https://isaopen.ezvizlife.com/api/lapp/token/get"
 )
 
 app = FastAPI(title="EZVIZ Camera Test")
@@ -223,7 +223,15 @@ def obtener_token_fresco():
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             timeout=10,
         )
-        j1 = r1.json()
+        try:
+            j1 = r1.json()
+        except Exception:
+            resultado["paso_1_pedir_token"] = {
+                "http_status": r1.status_code,
+                "error": "La respuesta no es JSON válido",
+                "raw_body": r1.text[:500],
+            }
+            return resultado
         resultado["paso_1_pedir_token"] = {
             "http_status": r1.status_code,
             "code": j1.get("code"),
